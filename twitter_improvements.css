@@ -26,6 +26,15 @@
             fill: rgb(29, 155, 240);
         }
     }
+
+    &:active {
+        background-color: rgba(29, 155, 240, 0.2);
+
+        button svg {
+            transition: fill 0.15s ease-out;
+            fill: rgb(17, 149, 236);
+        }
+    }
 }
 
 .usybutton {

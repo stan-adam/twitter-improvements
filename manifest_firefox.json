@@ -37,11 +37,6 @@
         "js": ["twitter_improvements.js"],
         "css": ["twitter_improvements.css"]
       }
-    ],
-
-    "web_accessible_resources": [
-        "SVG/copy_vx.svg",
-        "SVG/download.svg"
     ]
 }
   

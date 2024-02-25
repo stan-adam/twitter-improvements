@@ -18,23 +18,23 @@
     height: 35px;
     transition: background-color .15s ease-out;
     border-radius: 25px;
+}
 
-    &:hover {
-        background-color: rgba(29, 155, 240, 0.1);
+.usyclickdiv:hover {
+    background-color: rgba(29, 155, 240, 0.1);
+}
 
-        button svg {
-            fill: rgb(29, 155, 240);
-        }
-    }
+.usyclickdiv:hover button svg {
+    fill: rgb(29, 155, 240);
+}
 
-    &:active {
-        background-color: rgba(29, 155, 240, 0.2);
+.usyclickdiv:active {
+    background-color: rgba(29, 155, 240, 0.2);
+}
 
-        button svg {
-            transition: fill 0.15s ease-out;
-            fill: rgb(17, 149, 236);
-        }
-    }
+.usyclickdiv:active button svg {
+    transition: fill 0.15s ease-out;
+    fill: rgb(17, 149, 236);
 }
 
 .usybutton {
@@ -48,13 +48,13 @@
     vertical-align: middle;
     padding: 0px 10px;
     line-height: 1;
+}
 
-    svg {
-        margin: auto;
-        align-self: center;
-        max-width: 100%;
-        width: 1.5em;
-        height: 1.5em;
-        fill: rgb(113, 118, 123);
-    }
+.usybutton svg {
+    margin: auto;
+    align-self: center;
+    max-width: 100%;
+    width: 1.5em;
+    height: 1.5em;
+    fill: rgb(113, 118, 123);
 }

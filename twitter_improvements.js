@@ -124,7 +124,7 @@ async function get_split_tweet_url(tweet) {
 }
 
 async function getVX_URL(tweet) {
-    let url = await get_tweet_url(tweet);
+    let url = await get_split_tweet_url(tweet);
     return await splitLinkAsVX(url);
 }
 

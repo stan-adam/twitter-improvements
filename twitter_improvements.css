@@ -58,3 +58,8 @@
     height: 1.5em;
     fill: rgb(113, 118, 123);
 }
+
+.usyimagediv {
+    align-items: right;
+    justify-content: right;
+}

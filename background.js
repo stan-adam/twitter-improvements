@@ -47,3 +47,18 @@ function saveTwitterImage(url, info) {
         url: img
     });
 }
+
+async function download(url, filename) {
+    chrome.downloads.download({
+        filename: filename,
+        url: url
+    });
+}
+
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+        if (request.thespecialsecret = "download") {
+            download(request.downurl, request.downfilename);
+        }
+    }
+)

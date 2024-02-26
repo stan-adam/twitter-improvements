@@ -6,16 +6,15 @@ const MEDIA_FUNCTIONS = async (media) => {
     save_media(media);
 };
 
-const VX_SVG_PATH = "M 18.36 5.64 c -1.95 -1.96 -5.11 -1.96 -7.07 0 l -1.41 1.41 l -1.42 -1.41 l 1.42 -1.42 c 2.73 -2.73 7.16 -2.73 9.9 0 c 2.73 2.74 2.73 7.17 0 9.9 l -1.42 1.42 l -1.41 -1.42 l 1.41 -1.41 c 1.96 -1.96 1.96 -5.12 0 -7.07 z m -2.12 3.53 z m -12.02 0.71 l 1.42 -1.42 l 1.41 1.42 l -1.41 1.41 c -1.96 1.96 -1.96 5.12 0 7.07 c 1.95 1.96 5.11 1.96 7.07 0 l 1.41 -1.41 l 1.42 1.41 l -1.42 1.42 c -2.73 2.73 -7.16 2.73 -9.9 0 c -2.73 -2.74 -2.73 -7.17 0 -9.9 z m 1 5 l 1.2728 -1.2728 l 2.9698 1.2728 l -1.4142 -2.8284 l 1.2728 -1.2728 l 2.2627 6.2225 l -6.364 -2.1213 m 4.9497 -4.9497 l 3.182 1.0607 l 1.0607 3.182 l 1.2728 -1.2728 l -0.7071 -2.1213 l 2.1213 0.7071 l 1.2728 -1.2728 l -3.182 -1.0607 l -1.0607 -3.182 l -1.2728 1.2728 l 0.7071 2.1213 l -2.1213 -0.7071 l -1.2728 1.2728";
-const DOWNLOAD_SVG_PATH = "M 12 17.41 l -5.7 -5.7 l 1.41 -1.42 L 11 13.59 V 4 h 2 V 13.59 l 3.3 -3.3 l 1.41 1.42 L 12 17.41 zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z";
-
+let VX_BUTTON;
+let DOWNLOAD_BUTTON;
 
 // Functions to run on each tweet
 
 async function add_vx(tweet) {
     try {
         let share_button = await getTweetButtonPositionAnchor(tweet);
-        let vx_button = await createButton(VX_SVG_PATH);
+        let vx_button = VX_BUTTON.cloneNode(true);
         let url = await getVX_URL(tweet);
         vx_button.onmousedown = () => navigator.clipboard.writeText(url);
         share_button.after(vx_button);
@@ -30,16 +29,13 @@ async function add_vx(tweet) {
 async function save_media(media) {
     try {
         let anchor = await getMediaButtonPositionAnchor(media);
-        let download_button = await createButton(DOWNLOAD_SVG_PATH);
+        let download_button = DOWNLOAD_BUTTON.cloneNode(true);
         if (media.nodeName === "IMG") {
             anchor.appendChild(download_button);
             let url = await getOriginalImageUrl(media);
             let filename = await getImageFileName(media);
             download_button.onmousedown = () => {
-                chrome.downloads.download({
-                    filename: filename,
-                    url: url
-                });
+                chrome.runtime.sendMessage({thespecialsecret: "download", downurl: url, downfilename: filename});
             };
         }
 
@@ -83,19 +79,23 @@ async function createButton(svg_path) {
     }
     clickable_div.appendChild(btn);
     div.appendChild(clickable_div);
-    btn.classList.add("usybutton");
-    clickable_div.classList.add("usyclickdiv");
-    div.classList.add("usydiv");
     return div;
 }
 
 async function createVXButton() {
-    let div = await createButton(VX_SVG_PATH);
-    div.classList.add();
+    let div = await createButton("M 18.36 5.64 c -1.95 -1.96 -5.11 -1.96 -7.07 0 l -1.41 1.41 l -1.42 -1.41 l 1.42 -1.42 c 2.73 -2.73 7.16 -2.73 9.9 0 c 2.73 2.74 2.73 7.17 0 9.9 l -1.42 1.42 l -1.41 -1.42 l 1.41 -1.41 c 1.96 -1.96 1.96 -5.12 0 -7.07 z m -2.12 3.53 z m -12.02 0.71 l 1.42 -1.42 l 1.41 1.42 l -1.41 1.41 c -1.96 1.96 -1.96 5.12 0 7.07 c 1.95 1.96 5.11 1.96 7.07 0 l 1.41 -1.41 l 1.42 1.41 l -1.42 1.42 c -2.73 2.73 -7.16 2.73 -9.9 0 c -2.73 -2.74 -2.73 -7.17 0 -9.9 z m 1 5 l 1.2728 -1.2728 l 2.9698 1.2728 l -1.4142 -2.8284 l 1.2728 -1.2728 l 2.2627 6.2225 l -6.364 -2.1213 m 4.9497 -4.9497 l 3.182 1.0607 l 1.0607 3.182 l 1.2728 -1.2728 l -0.7071 -2.1213 l 2.1213 0.7071 l 1.2728 -1.2728 l -3.182 -1.0607 l -1.0607 -3.182 l -1.2728 1.2728 l 0.7071 2.1213 l -2.1213 -0.7071 l -1.2728 1.2728");
+    div.classList.add("usydiv");
+    div.firstChild.classList.add("usyclickdiv");
+    div.firstChild.firstChild.classList.add("usybutton");
+    return div;
 }
 
 async function createDownloadButton() {
-
+    let div = await createButton("M 12 17.41 l -5.7 -5.7 l 1.41 -1.42 L 11 13.59 V 4 h 2 V 13.59 l 3.3 -3.3 l 1.41 1.42 L 12 17.41 zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z");
+    div.classList.add("usydiv", "usyimagediv");
+    div.firstChild.classList.add("usyclickdiv");
+    div.firstChild.firstChild.classList.add("usybutton");
+    return div;
 }
 
 
@@ -133,7 +133,7 @@ async function getOriginalImageUrl(media) {
 }
 
 async function getImageFileName(media) {
-    let url = media.parentNode.parentNode.parentNode.parentNode.href.split("/");
+    let url = media.parentNode.parentNode.parentNode.href.split("/");
     let src_url = media.src;
     let file_end = src_url.match(/format=(\w+)/)[1];
     let user = url[3];
@@ -144,6 +144,11 @@ async function getImageFileName(media) {
 
 
 // Observes new tweets, runs each function on them
+
+async function init_buttons() {
+    VX_BUTTON = await createVXButton();
+    DOWNLOAD_BUTTON = await createDownloadButton();
+}
 
 async function getImageNodes(nodes) {
     return nodes.filter(node => node.nodeName === "IMG")
@@ -162,6 +167,8 @@ async function getTweetNodes(nodes) {
 }
 
 async function tweet_observer() {
+    await init_buttons();
+
     const callback = async (mutationList, observer) => {
         let nodes = mutationList.map(mutation => mutation.addedNodes)
                                 .filter(nodelist => nodelist.length > 0)
@@ -169,7 +176,7 @@ async function tweet_observer() {
         
         getTweetNodes(nodes).then(nodes => nodes.forEach(node => TWEET_FUNCTIONS(node)));
         getImageNodes(nodes).then(nodes => nodes.forEach(node => MEDIA_FUNCTIONS(node)));
-        getVideoNodes(nodes).then(nodes => nodes.forEach(node => MEDIA_FUNCTIONS(node)));
+        // getVideoNodes(nodes).then(nodes => nodes.forEach(node => MEDIA_FUNCTIONS(node)));
     }
 
     const observerConfig = {

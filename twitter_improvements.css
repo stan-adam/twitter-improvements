@@ -1,11 +1,11 @@
-.usydiv {
+.usybuttondiv {
     display: inline-grid;
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
 }
 
-.usyclickdiv {
+.usybuttonclickdiv {
     box-sizing: border-box;
     flex-basis: auto;
     flex-direction: column;
@@ -20,19 +20,19 @@
     border-radius: 25px;
 }
 
-.usyclickdiv:hover {
+.usybuttonclickdiv:hover {
     background-color: rgba(29, 155, 240, 0.1);
 }
 
-.usyclickdiv:hover button svg {
+.usybuttonclickdiv:hover button svg {
     fill: rgb(29, 155, 240);
 }
 
-.usyclickdiv:active {
+.usybuttonclickdiv:active {
     background-color: rgba(29, 155, 240, 0.2);
 }
 
-.usyclickdiv:active button svg {
+.usybuttonclickdiv:active button svg {
     transition: fill 0.15s ease-out;
     fill: rgb(17, 149, 236);
 }
@@ -62,4 +62,8 @@
 .usyimagediv {
     align-items: right;
     justify-content: right;
+}
+
+.usydownloadbutton svg {
+    fill: white;
 }

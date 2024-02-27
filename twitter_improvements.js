@@ -31,18 +31,22 @@ async function save_media(media) {
         let anchor = await getMediaButtonPositionAnchor(media);
         let download_button = DOWNLOAD_BUTTON.cloneNode(true);
         if (media.nodeName === "IMG") {
-            anchor.appendChild(download_button);
             let url = await getOriginalImageUrl(media);
             let filename = await getImageFileName(media);
+            anchor.appendChild(download_button);
             download_button.onmousedown = () => {
                 chrome.runtime.sendMessage({thespecialsecret: "download", downurl: url, downfilename: filename});
             };
+        }
+        else {
+            anchor.appendChild(download_button);
         }
 
         // ENABLE_LOGGING && console.log("Created Save Media Button: ");
     }
     catch(error) {
         ENABLE_LOGGING && console.error("save_media error: " + error);
+        console.error("save_media error: " + error);
         return;
     }
 }
@@ -60,9 +64,14 @@ async function getMediaButtonPositionAnchor(media) {
     if(media.nodeName === "IMG") {
         return media.parentNode; // add first child to this
     }
-
-    // return something for video figure this out later idk
-    // video/gif -> 'div[testid="videoComponent"]' 'div[testid="videoPlayer"]'
+    else {
+        try {
+            return media.parentNode.parentNode.parentNode.childList[1].firstChild.firstChild.childList[3].firstChild.childList[1].childList[1];
+        }
+        catch {
+            return media.parentNode.parentNode.parentNode.childList[1].firstChild.firstChild;
+        }
+    }
 }
 
 async function createButton(svg_path) {
@@ -133,7 +142,13 @@ async function getOriginalImageUrl(media) {
 }
 
 async function getImageFileName(media) {
-    let url = media.parentNode.parentNode.parentNode.href.split("/");
+    let url = window.location.href.split("/")[6];
+    if (url === "photo") {
+        url = window.location.href.split("/");
+    }
+    else {
+        url = media.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('a[href*="/status/"').href.split("/");
+    }
     let src_url = media.src;
     let file_end = src_url.match(/format=(\w+)/)[1];
     let user = url[3];
@@ -156,8 +171,13 @@ async function getImageNodes(nodes) {
 }
 
 async function getVideoNodes(nodes) {
-    return nodes.filter(node => node.nodeName === "DIV")
-                .filter(node => node.querySelector('video[poster*="https://pbs.twimg.com/ext_tw_video_thumb/"]') || node.querySelector('video[poster*="https://pbs.twimg.com/amplify_video_thumb/"]'));
+    // return nodes.filter(node => node.nodeName === "DIV")
+    //             .filter(node => node.querySelector('video[poster*="https://pbs.twimg.com/ext_tw_video_thumb/"]') || node.querySelector('video[poster*="https://pbs.twimg.com/amplify_video_thumb/"]'));
+    
+    // return nodes.filter(node => node.nodeName === "DIV")
+    //             .filter(node => node.querySelector('div[data-testid="videoComponent"]'));
+
+    return nodes.filter(node => node.nodeName === "VIDEO");
 }
 
 async function getTweetNodes(nodes) {

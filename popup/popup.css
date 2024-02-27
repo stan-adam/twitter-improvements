@@ -2,7 +2,7 @@ body {
   background-color: #2b2a33
 }
 
-#settings-button {
+.settings-button {
   background: linear-gradient(40deg,#ff6ec4,#7873f5);
   border-radius: 8px;
   border-style: none;
@@ -29,7 +29,7 @@ body {
   touch-action: manipulation;
 }
 
-#settings-button:hover,
-#settings-button:focus {
+.settings-button:hover,
+.settings-button:focus {
   background-color: #F082AC;
 }

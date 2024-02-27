@@ -20,7 +20,8 @@
       "activeTab",
       "downloads",
       "tabs",
-      "clipboardWrite"
+      "clipboardWrite",
+      "storage"
     ],
 
     "background": {

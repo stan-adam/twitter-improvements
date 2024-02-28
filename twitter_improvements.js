@@ -177,7 +177,10 @@ async function getVideoNodes(nodes) {
     // return nodes.filter(node => node.nodeName === "DIV")
     //             .filter(node => node.querySelector('div[data-testid="videoComponent"]'));
 
-    return nodes.filter(node => node.nodeName === "VIDEO");
+    // return nodes.filter(node => node.nodeName === "VIDEO");
+
+    return nodes.filter(node => node.nodeName === "DIV")
+                .filter(node => node.querySelector('div[aria-label="Video Settings"]'));
 }
 
 async function getTweetNodes(nodes) {

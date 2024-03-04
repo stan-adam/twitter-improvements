@@ -50,7 +50,6 @@ async function save_video(video) {
     try {
         let anchor = await get_video_anchor(video);
         let download_button = DOWNLOAD_BUTTON_VIDEO.cloneNode(true);
-        anchor.appendChild(download_button);
         for(let i = 0; i < 16; i++) {
             video = video.parentNode;
         }
@@ -80,7 +79,7 @@ async function get_image_anchor(media) {
 }
 
 async function get_video_anchor(video) {
-    return await get_tweet_anchor(media.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode);
+    return await get_tweet_anchor(video.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode);
 }
 
 async function get_button(svg_path) {

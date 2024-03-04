@@ -1,3 +1,7 @@
+if (typeof browser === "undefined") {
+    var browser = chrome;
+}
+
 const ENABLE_LOGGING = false;
 
 const default_settings = {

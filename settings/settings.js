@@ -1,3 +1,7 @@
+if (typeof browser === "undefined") {
+    var browser = chrome;
+}
+
 const VX_BUTTON_SETTING = "vx_button"
 const IMAGE_BUTTON_SETTING = "image_button"
 const VIDEO_BUTTON_SETTING = "video_button"

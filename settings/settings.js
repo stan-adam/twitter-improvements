@@ -1,39 +1,35 @@
-const vx_button = document.getElementById("vx_button");
-const download_button = document.getElementById("download_button");
+const VX_BUTTON_SETTING = "vx_button"
+const IMAGE_BUTTON_SETTING = "image_button"
+const VIDEO_BUTTON_SETTING = "video_button"
 
 async function setButtons() {
-    vx_button.checked = await get_value("vx_button_enabled");
-    download_button.checked = await get_value("download_button_enabled");
+    document.getElementById("vx_button").checked = await get_value(VX_BUTTON_SETTING);
+    document.getElementById("image_button").checked = await get_value(IMAGE_BUTTON_SETTING);
+    document.getElementById("video_button").checked = await get_value(VIDEO_BUTTON_SETTING);
 }
 
-vx_button.addEventListener("change", () => {
-    chrome.storage.local.set(
-        {
-            "vx_button_enabled": !get_value("vx_button_enabled")
-        }
-    );
-});
-
-download_button.addEventListener("change", () => {
-    chrome.storage.local.set(
-        {
-            "download_button_enabled": !get_value("download_button_enabled")
-        }
-    );
-});
+document.getElementById("vx_button_label").onmousedown = () => toggle_value(VX_BUTTON_SETTING);
+document.getElementById("image_button_label").onmousedown = () => toggle_value(IMAGE_BUTTON_SETTING);
+document.getElementById("video_button_label").onmousedown = () => toggle_value(VIDEO_BUTTON_SETTING);
 
 async function get_value(value) {
-    let return_value = await chrome.storage.local.get(value, data => {
-        if(value in data) {
-            return data[value];
-        }
-        else {
-            chrome.storage.local.set({value: true});
-            return true;
-        }
-    });
-    console.log(return_value);
-    return return_value;
+    let data = JSON.stringify(await browser.storage.local.get([value]));
+    let has_true = data.includes("true");
+    let has_false = data.includes("false");
+    if ((has_false || has_true) === false) {
+        let data = {};
+        data[value] = true;
+        chrome.storage.local.set(data);
+        has_true = true;
+    }
+    return has_true;
+}
+
+async function toggle_value(value) {
+    let current_value = await get_value(value);
+    let data = {};
+    data[value] = !current_value;
+    chrome.storage.local.set(data);
 }
 
 setButtons();

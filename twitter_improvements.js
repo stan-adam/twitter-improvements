@@ -1,13 +1,11 @@
 const ENABLE_LOGGING = false;
-const TWEET_FUNCTIONS = async (tweet) => {
-    add_vx(tweet);
+
+const default_settings = {
+    vx_button: true,
+    image_button: true,
+    video_button: true
 };
-const IMAGE_FUNCTIONS = async (image) => {
-    save_image(image);
-};
-const VIDEO_FUNCTIONS = async (video) => {
-    save_video(video);
-}
+check_storage_values();
 
 let VX_BUTTON;
 let DOWNLOAD_BUTTON_IMAGE;
@@ -195,6 +193,24 @@ async function get_video_filename(tweet) {
 }
 
 
+// Storage functions
+
+async function get_storage_values() {
+    let data = await browser.storage.local.get();
+    let vx_enabled = data["vx_button"];
+    let image_enabled = data["image_button"];
+    let video_enabled = data["video_button"];
+    return [vx_enabled, image_enabled, video_enabled];
+}
+
+async function check_storage_values() {
+    let vx, image, video = await get_storage_values();
+    if (vx === undefined || image === undefined || video === undefined) {
+        chrome.storage.local.set(default_settings);
+    }
+}
+
+
 // Observes new tweets, runs each function on them
 
 async function init_buttons() {
@@ -220,26 +236,30 @@ async function get_tweet_nodes(nodes) {
 }
 
 async function tweet_observer() {
-    await init_buttons();
+    let [vx, image, video] = await get_storage_values();
 
-    const callback = async (mutationList, observer) => {
-        let nodes = mutationList.map(mutation => mutation.addedNodes)
-                                .filter(nodelist => nodelist.length > 0)
-                                .map(nodelist => nodelist[0]);
-        
-        get_tweet_nodes(nodes).then(nodes => nodes.forEach(node => TWEET_FUNCTIONS(node)));
-        get_image_nodes(nodes).then(nodes => nodes.forEach(node => IMAGE_FUNCTIONS(node)));
-        get_video_nodes(nodes).then(nodes => nodes.forEach(node => VIDEO_FUNCTIONS(node)));
-    }
+    if(vx || image || video) {
+        await init_buttons();
 
-    const observerConfig = {
-        subtree: true,
-        childList: true
+        const callback = async (mutationList, observer) => {
+            let nodes = mutationList.map(mutation => mutation.addedNodes)
+                                    .filter(nodelist => nodelist.length > 0)
+                                    .map(nodelist => nodelist[0]);
+            
+            vx && get_tweet_nodes(nodes).then(nodes => nodes.forEach(node => add_vx(node)));
+            image && get_image_nodes(nodes).then(nodes => nodes.forEach(node => save_image(node)));
+            video && get_video_nodes(nodes).then(nodes => nodes.forEach(node => save_video(node)));
+        }
+    
+        const observerConfig = {
+            subtree: true,
+            childList: true
+        }
+        let targetNode = document.body;
+        const observer = new MutationObserver(callback);
+        observer.observe(targetNode, observerConfig);
+        ENABLE_LOGGING && console.log("Mutation Observer Started");
     }
-    let targetNode = document.body;
-    const observer = new MutationObserver(callback);
-    observer.observe(targetNode, observerConfig);
-    ENABLE_LOGGING && console.log("Mutation Observer Started");
 }
 
 

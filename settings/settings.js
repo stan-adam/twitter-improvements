@@ -13,16 +13,15 @@ document.getElementById("image_button_label").onmousedown = () => toggle_value(I
 document.getElementById("video_button_label").onmousedown = () => toggle_value(VIDEO_BUTTON_SETTING);
 
 async function get_value(value) {
-    let data = JSON.stringify(await browser.storage.local.get([value]));
-    let has_true = data.includes("true");
-    let has_false = data.includes("false");
-    if ((has_false || has_true) === false) {
-        let data = {};
+    let data = await browser.storage.local.get([value]);
+    let enabled = data[value];
+    if (enabled === undefined) {
+        data = {};
         data[value] = true;
         chrome.storage.local.set(data);
-        has_true = true;
+        enabled = true;
     }
-    return has_true;
+    return enabled;
 }
 
 async function toggle_value(value) {

@@ -17,7 +17,7 @@ async function create_button(button) {
     let outer = document.createElement("DIV");
 
     let name_label = document.createElement("LABEL");
-    name_label.innerHTML = button[1];
+    name_label.innerText = button[1];
     name_label.setAttribute("for", button[0]);
 
     let toggle = document.createElement("LABEL");

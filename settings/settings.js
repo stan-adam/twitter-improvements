@@ -2,19 +2,46 @@ if (typeof browser === "undefined") {
     var browser = chrome;
 }
 
-const VX_BUTTON_SETTING = "vx_button"
-const IMAGE_BUTTON_SETTING = "image_button"
-const VIDEO_BUTTON_SETTING = "video_button"
+const DIV = document.body.querySelector("DIV");
 
-async function setButtons() {
-    document.getElementById("vx_button").checked = await get_value(VX_BUTTON_SETTING);
-    document.getElementById("image_button").checked = await get_value(IMAGE_BUTTON_SETTING);
-    document.getElementById("video_button").checked = await get_value(VIDEO_BUTTON_SETTING);
+const buttons = [
+    ["vx_button", "Enable Share as VX Button"], 
+    ["image_button", "Enable Image Download Buttons"],
+    ["video_button", "Enable Video/GIF Download Buttons"],
+    ["experimental_button", "Enable Experimental (better looking) buttons"]
+]
+
+for (let i = 0; i < buttons.length; i++) create_button(buttons[i]);
+
+async function create_button(button) {
+    let outer = document.createElement("DIV");
+
+    let name_label = document.createElement("LABEL");
+    name_label.innerHTML = button[1];
+    name_label.setAttribute("for", button[0]);
+
+    let toggle = document.createElement("LABEL");
+    toggle.classList.add("switch");
+    toggle.id = button[0] + "_label";
+
+    let input_elem = document.createElement("INPUT");
+    input_elem.setAttribute("type", "checkbox");
+    input_elem.id = button[0];
+    input_elem.checked = await get_value(button[0]);
+
+    let span_elem = document.createElement("SPAN");
+    span_elem.classList.add("slider", "round");
+
+    toggle.appendChild(input_elem);
+    toggle.appendChild(span_elem);
+
+    outer.appendChild(name_label);
+    outer.appendChild(toggle);
+
+    DIV.appendChild(outer);
+
+    toggle.onclick = () => toggle_value(button[0]);
 }
-
-document.getElementById("vx_button_label").onmousedown = () => toggle_value(VX_BUTTON_SETTING);
-document.getElementById("image_button_label").onmousedown = () => toggle_value(IMAGE_BUTTON_SETTING);
-document.getElementById("video_button_label").onmousedown = () => toggle_value(VIDEO_BUTTON_SETTING);
 
 async function get_value(value) {
     let data = await browser.storage.local.get([value]);
@@ -34,5 +61,3 @@ async function toggle_value(value) {
     data[value] = !current_value;
     chrome.storage.local.set(data);
 }
-
-setButtons();

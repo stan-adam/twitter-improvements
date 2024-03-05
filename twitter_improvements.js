@@ -7,7 +7,8 @@ const ENABLE_LOGGING = false;
 const default_settings = {
     vx_button: true,
     image_button: true,
-    video_button: true
+    video_button: true,
+    experimental_button: true
 };
 check_storage_values();
 

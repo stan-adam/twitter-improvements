@@ -11,17 +11,14 @@ const default_settings = {
 };
 check_storage_values();
 
-let VX_BUTTON;
-let DOWNLOAD_BUTTON_IMAGE;
-let DOWNLOAD_BUTTON_VIDEO;
+let TWITTER_SHARE_BUTTON;
 
 // Functions to run on each tweet
 
 async function add_vx(tweet) {
     try {
         let share_button = await get_tweet_anchor(tweet);
-        // let vx_button = VX_BUTTON.cloneNode(true);
-        let vx_button = await test_new_button(share_button);
+        let vx_button = await get_vx_button();
         let url = await get_tweet_url_vx(tweet);
         vx_button.onmousedown = () => navigator.clipboard.writeText(url);
         share_button.after(vx_button);
@@ -36,7 +33,7 @@ async function add_vx(tweet) {
 async function save_image(image) {
     try {
         let anchor = await get_image_anchor(image);
-        let download_button = DOWNLOAD_BUTTON_IMAGE.cloneNode(true);
+        let download_button = await get_media_button();
         let url = await get_image_full_res_url(image);
         let filename = await get_image_filename(image);
         anchor.appendChild(download_button);
@@ -52,7 +49,7 @@ async function save_image(image) {
 async function save_video(video) {
     try {
         let anchor = await get_video_anchor(video);
-        let download_button = DOWNLOAD_BUTTON_VIDEO.cloneNode(true);
+        let download_button = await get_media_button();
         for(let i = 0; i < 16; i++) {
             video = video.parentNode;
         }
@@ -85,53 +82,58 @@ async function get_video_anchor(video) {
     return await get_tweet_anchor(video.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode);
 }
 
-async function get_button(svg_path) {
-    let div = document.createElement("div");
-    let clickable_div = document.createElement("div");
-    let btn = document.createElement("button");
-    if(svg_path !== null) {
-        let svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        let path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-        svg.setAttributeNS(null, 'viewBox', "0 0 24 24");
-        path.setAttributeNS(null, "d", svg_path);
-        svg.appendChild(path);
-        btn.appendChild(svg);
-    }
-    clickable_div.appendChild(btn);
-    div.appendChild(clickable_div);
-    return div;
+async function get_vx_button() {
+    let btn = await get_button_from_original(TWITTER_SHARE_BUTTON);
+    btn.querySelector('path').setAttributeNS(null, "d", "M 18.36 5.64 c -1.95 -1.96 -5.11 -1.96 -7.07 0 l -1.41 1.41 l -1.42 -1.41 l 1.42 -1.42 c 2.73 -2.73 7.16 -2.73 9.9 0 c 2.73 2.74 2.73 7.17 0 9.9 l -1.42 1.42 l -1.41 -1.42 l 1.41 -1.41 c 1.96 -1.96 1.96 -5.12 0 -7.07 z m -2.12 3.53 z m -12.02 0.71 l 1.42 -1.42 l 1.41 1.42 l -1.41 1.41 c -1.96 1.96 -1.96 5.12 0 7.07 c 1.95 1.96 5.11 1.96 7.07 0 l 1.41 -1.41 l 1.42 1.41 l -1.42 1.42 c -2.73 2.73 -7.16 2.73 -9.9 0 c -2.73 -2.74 -2.73 -7.17 0 -9.9 z m 1 5 l 1.2728 -1.2728 l 2.9698 1.2728 l -1.4142 -2.8284 l 1.2728 -1.2728 l 2.2627 6.2225 l -6.364 -2.1213 m 4.9497 -4.9497 l 3.182 1.0607 l 1.0607 3.182 l 1.2728 -1.2728 l -0.7071 -2.1213 l 2.1213 0.7071 l 1.2728 -1.2728 l -3.182 -1.0607 l -1.0607 -3.182 l -1.2728 1.2728 l 0.7071 2.1213 l -2.1213 -0.7071 l -1.2728 1.2728");
+    return btn;
 }
 
-async function test_new_button(share_button) {
+async function get_media_button() {
+    let btn = await get_button_from_original(TWITTER_SHARE_BUTTON);
+    btn.querySelector('path').setAttributeNS(null, "d", "M 12 17.41 l -5.7 -5.7 l 1.41 -1.42 L 11 13.59 V 4 h 2 V 13.59 l 3.3 -3.3 l 1.41 1.42 L 12 17.41 zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z");
+    return btn;
+}
+
+async function get_button_from_original(share_button) {
     let button = share_button.cloneNode(true);
     button.firstChild.firstChild.setAttribute("aria-label", "VX Share");
-    button.querySelector('path').setAttributeNS(null, "d", "M 18.36 5.64 c -1.95 -1.96 -5.11 -1.96 -7.07 0 l -1.41 1.41 l -1.42 -1.41 l 1.42 -1.42 c 2.73 -2.73 7.16 -2.73 9.9 0 c 2.73 2.74 2.73 7.17 0 9.9 l -1.42 1.42 l -1.41 -1.42 l 1.41 -1.41 c 1.96 -1.96 1.96 -5.12 0 -7.07 z m -2.12 3.53 z m -12.02 0.71 l 1.42 -1.42 l 1.41 1.42 l -1.41 1.41 c -1.96 1.96 -1.96 5.12 0 7.07 c 1.95 1.96 5.11 1.96 7.07 0 l 1.41 -1.41 l 1.42 1.41 l -1.42 1.42 c -2.73 2.73 -7.16 2.73 -9.9 0 c -2.73 -2.74 -2.73 -7.17 0 -9.9 z m 1 5 l 1.2728 -1.2728 l 2.9698 1.2728 l -1.4142 -2.8284 l 1.2728 -1.2728 l 2.2627 6.2225 l -6.364 -2.1213 m 4.9497 -4.9497 l 3.182 1.0607 l 1.0607 3.182 l 1.2728 -1.2728 l -0.7071 -2.1213 l 2.1213 0.7071 l 1.2728 -1.2728 l -3.182 -1.0607 l -1.0607 -3.182 l -1.2728 1.2728 l 0.7071 2.1213 l -2.1213 -0.7071 l -1.2728 1.2728");
+
+    button.firstChild.firstChild.firstChild.addEventListener('mouseover', async (elem) => {
+        let btn = await get_parent_div(elem);
+        btn.firstChild.classList.add("r-1cvl2hr");
+        btn.firstChild.style.color = "";
+        btn.firstChild.firstChild.firstChild.classList.replace("r-1niwhzg", "r-1peqgm7");
+    });
+
+    button.firstChild.firstChild.firstChild.addEventListener('mouseout', async (elem) => {
+        let btn = await get_parent_div(elem);
+        btn.firstChild.classList.remove("r-1cvl2hr");
+        btn.firstChild.style.color = "rgb(113, 118, 123)";
+        btn.firstChild.firstChild.firstChild.classList.replace("r-1peqgm7", "r-1niwhzg");
+    });
     return button;
 }
 
-async function get_vx_share_button() {
-    let div = await get_button("M 18.36 5.64 c -1.95 -1.96 -5.11 -1.96 -7.07 0 l -1.41 1.41 l -1.42 -1.41 l 1.42 -1.42 c 2.73 -2.73 7.16 -2.73 9.9 0 c 2.73 2.74 2.73 7.17 0 9.9 l -1.42 1.42 l -1.41 -1.42 l 1.41 -1.41 c 1.96 -1.96 1.96 -5.12 0 -7.07 z m -2.12 3.53 z m -12.02 0.71 l 1.42 -1.42 l 1.41 1.42 l -1.41 1.41 c -1.96 1.96 -1.96 5.12 0 7.07 c 1.95 1.96 5.11 1.96 7.07 0 l 1.41 -1.41 l 1.42 1.41 l -1.42 1.42 c -2.73 2.73 -7.16 2.73 -9.9 0 c -2.73 -2.74 -2.73 -7.17 0 -9.9 z m 1 5 l 1.2728 -1.2728 l 2.9698 1.2728 l -1.4142 -2.8284 l 1.2728 -1.2728 l 2.2627 6.2225 l -6.364 -2.1213 m 4.9497 -4.9497 l 3.182 1.0607 l 1.0607 3.182 l 1.2728 -1.2728 l -0.7071 -2.1213 l 2.1213 0.7071 l 1.2728 -1.2728 l -3.182 -1.0607 l -1.0607 -3.182 l -1.2728 1.2728 l 0.7071 2.1213 l -2.1213 -0.7071 l -1.2728 1.2728");
-    return await add_share_bar_classes_to_div(div);
-}
-
-async function get_video_download_button() {
-    let div = await get_button("M 12 17.41 l -5.7 -5.7 l 1.41 -1.42 L 11 13.59 V 4 h 2 V 13.59 l 3.3 -3.3 l 1.41 1.42 L 12 17.41 zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z");
-    return await add_share_bar_classes_to_div(div);
-}
-
-async function add_share_bar_classes_to_div(div) {
-    div.classList.add("usybuttondiv");
-    div.firstChild.classList.add("usybuttonclickdiv");
-    div.firstChild.firstChild.classList.add("usybutton");
-    return div;
-}
-
-async function get_image_download_button() {
-    let div = await get_button("M 12 17.41 l -5.7 -5.7 l 1.41 -1.42 L 11 13.59 V 4 h 2 V 13.59 l 3.3 -3.3 l 1.41 1.42 L 12 17.41 zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z");
-    div.classList.add("usybuttondiv", "usyimagediv");
-    div.firstChild.classList.add("usybuttonclickdiv");
-    div.firstChild.firstChild.classList.add("usybutton", "usydownloadbutton");
-    return div;
+async function get_parent_div(elem) {
+    let btn = elem.target;
+    switch (elem.target.nodeName) {
+        case "DIV":
+            if (elem.target.role === "button") break;
+            else if (elem.target.dir === "ltr") btn = btn.parentNode;
+            else if (elem.target.classList.length === 2) btn = btn.parentNode.parentNode;
+            else btn = btn.parentNode.parentNode.parentNode;
+            break;
+        case "svg":
+            btn = btn.parentNode.parentNode.parentNode;
+            break;
+        case "g":
+            btn = btn.parentNode.parentNode.parentNode.parentNode;
+            break;
+        case "path":
+            btn = btn.parentNode.parentNode.parentNode.parentNode.parentNode;
+            break;
+    }
+    return btn;
 }
 
 
@@ -204,6 +206,23 @@ async function get_video_filename(tweet) {
     return "[twitter] " + user + " - " + id + " - VID";
 }
 
+async function init_button(tweet) {
+    TWITTER_SHARE_BUTTON = await get_tweet_anchor(tweet);
+    return (TWITTER_SHARE_BUTTON !== null);
+}
+
+async function nodes_from_mutation_list(mutationList) {
+    return mutationList.map(mutation => mutation.addedNodes)
+                       .filter(nodelist => nodelist.length > 0)
+                       .map(nodelist => nodelist[0]);
+}
+
+async function node_operations(nodes, vx, image, video) {
+    vx && get_tweet_nodes(nodes).then(nodes => nodes.forEach(node => add_vx(node)));
+    image && get_image_nodes(nodes).then(nodes => nodes.forEach(node => save_image(node)));
+    video && get_video_nodes(nodes).then(nodes => nodes.forEach(node => save_video(node)));
+}
+
 
 // Storage functions
 
@@ -225,12 +244,6 @@ async function check_storage_values() {
 
 // Observes new tweets, runs each function on them
 
-async function init_buttons() {
-    VX_BUTTON = await get_vx_share_button();
-    DOWNLOAD_BUTTON_IMAGE = await get_image_download_button();
-    DOWNLOAD_BUTTON_VIDEO = await get_video_download_button();
-}
-
 async function get_image_nodes(nodes) {
     return nodes.filter(node => node.nodeName === "IMG")
                 .filter(node => node.src.includes("https://pbs.twimg.com/media/"));
@@ -251,16 +264,22 @@ async function tweet_observer() {
     let [vx, image, video] = await get_storage_values();
 
     if(vx || image || video) {
-        await init_buttons();
-
-        const callback = async (mutationList, observer) => {
-            let nodes = mutationList.map(mutation => mutation.addedNodes)
-                                    .filter(nodelist => nodelist.length > 0)
-                                    .map(nodelist => nodelist[0]);
+        const init_callback = async (mutationList, observer) => {
+            let nodes = await nodes_from_mutation_list(mutationList);
             
-            vx && get_tweet_nodes(nodes).then(nodes => nodes.forEach(node => add_vx(node)));
-            image && get_image_nodes(nodes).then(nodes => nodes.forEach(node => save_image(node)));
-            video && get_video_nodes(nodes).then(nodes => nodes.forEach(node => save_video(node)));
+            get_tweet_nodes(nodes).then(nodes => nodes.forEach(async node => {
+                if (await init_button(node)) {
+                    observer.disconnect();
+                    const tweet_observer = new MutationObserver(final_callback);
+                    tweet_observer.observe(targetNode, observerConfig);
+                    node_operations(nodes, vx, image, video);
+                }
+            }));
+        }
+
+        const final_callback = async (mutationList, observer) => {
+            let nodes = await nodes_from_mutation_list(mutationList);
+            node_operations(nodes, vx, image, video);
         }
     
         const observerConfig = {
@@ -268,8 +287,8 @@ async function tweet_observer() {
             childList: true
         }
         let targetNode = document.body;
-        const observer = new MutationObserver(callback);
-        observer.observe(targetNode, observerConfig);
+        const init_observer = new MutationObserver(init_callback);
+        init_observer.observe(targetNode, observerConfig);
         ENABLE_LOGGING && console.log("Mutation Observer Started");
     }
 }

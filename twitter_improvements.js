@@ -10,7 +10,24 @@ const default_settings = {
     video_button: true,
     experimental_button: true
 };
-check_storage_values();
+
+
+class Settings {
+    vx_button;
+    image_button;
+    video_button;
+    experimental_button;
+    
+    constructor(data) {
+        this.vx_enabled = data["vx_button"];
+        this.image_enabled = data["image_button"];
+        this.video_enabled = data["video_button"];
+        this.experimental_enabled = data["experimental_button"];
+    }
+}
+
+let settings;
+load_settings();
 
 // Functions to run on each tweet
 
@@ -221,27 +238,33 @@ async function nodes_from_mutation_list(mutationList) {
                        .map(nodelist => nodelist[0]);
 }
 
-async function node_operations(nodes, vx, image, video) {
-    vx && get_tweet_nodes(nodes).then(nodes => nodes.forEach(node => add_vx(node)));
-    image && get_image_nodes(nodes).then(nodes => nodes.forEach(node => save_image(node)));
-    video && get_video_nodes(nodes).then(nodes => nodes.forEach(node => save_video(node)));
+async function node_operations(nodes) {
+    settings.vx_enabled && get_tweet_nodes(nodes).then(nodes => nodes.forEach(node => add_vx(node)));
+    settings.image_enabled && get_image_nodes(nodes).then(nodes => nodes.forEach(node => save_image(node)));
+    settings.video_enabled && get_video_nodes(nodes).then(nodes => nodes.forEach(node => save_video(node)));
 }
 
 
 // Storage functions
 
-async function get_storage_values() {
-    let data = await browser.storage.local.get();
-    let vx_enabled = data["vx_button"];
-    let image_enabled = data["image_button"];
-    let video_enabled = data["video_button"];
-    return [vx_enabled, image_enabled, video_enabled];
+async function get_storage() {
+    return await browser.storage.local.get();
 }
 
-async function check_storage_values() {
-    let vx, image, video = await get_storage_values();
-    if (vx === undefined || image === undefined || video === undefined) {
-        chrome.storage.local.set(default_settings);
+async function load_settings() {
+    let data = await get_storage();
+    await check_storage_valid(data);
+    data = await get_storage();
+    settings = new Settings(data);
+}
+
+async function check_storage_valid(data) {
+    for (option in default_settings) {
+        if (data[option] === undefined) {
+            data = {};
+            data[option] = default_settings[option];
+            chrome.storage.local.set(data);
+        }
     }
 }
 
@@ -265,12 +288,10 @@ async function get_tweet_nodes(nodes) {
 }
 
 async function tweet_observer() {
-    let [vx, image, video] = await get_storage_values();
-
-    if(vx || image || video) {
-        const final_callback = async (mutationList, observer) => {
+    if(settings.vx_enabled || settings.image_enabled || settings.video_enabled) {
+        const callback = async (mutationList, observer) => {
             let nodes = await nodes_from_mutation_list(mutationList);
-            node_operations(nodes, vx, image, video);
+            node_operations(nodes);
         }
     
         const observerConfig = {
@@ -278,7 +299,7 @@ async function tweet_observer() {
             childList: true
         }
         let targetNode = document.body;
-        const init_observer = new MutationObserver(final_callback);
+        const init_observer = new MutationObserver(callback);
         init_observer.observe(targetNode, observerConfig);
         ENABLE_LOGGING && console.log("Mutation Observer Started");
     }

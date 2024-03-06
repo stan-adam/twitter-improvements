@@ -49,6 +49,8 @@ function saveTwitterImage(url, info) {
 }
 
 async function download(url, filename) {
+    let file_end = url.match(/format=(\w+)/)[1];
+    filename += "." + file_end;
     chrome.downloads.download({
         filename: filename,
         url: url

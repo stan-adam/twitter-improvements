@@ -317,14 +317,6 @@
                 tweet.setAttribute("usy_tweet_marker", "yes");
             }
 
-            static async markTweetVideo(tweet) {
-                tweet.setAttribute("usy_tweet_contains_video", "true");
-            }
-
-            static async tweetHasVideoMarked(tweet) {
-                return tweet.getAttribute("usy_tweet_contains_video") !== null;
-            }
-
             static async elementIsMarked(tweet) {
                 return tweet.getAttribute("usy_tweet_marker") !== null;
             }
@@ -342,7 +334,14 @@
 
                 settings.vx_enabled && tweets.forEach(node => Nodes.addVXShareButton(node));
                 settings.image_enabled && Nodes.getImageNodes(nodes).then(nodes => nodes.forEach(node => Nodes.addSaveImageButton(node)));
-                settings.video_enabled && Nodes.getVideoNodes(nodes).then(nodes => Nodes.addSaveVideoButton(nodes[0]));
+                settings.video_enabled && Nodes.getVideoNodes(nodes).then(nodes => nodes.forEach(node => Nodes.addSaveVideoButton(node).then(tweet => Nodes.cleanTweet(tweet))));
+            }
+
+            static async cleanTweet(tweet) {
+                let vid_buttons = tweet.querySelectorAll('div[usy_label="Video"');
+                if (vid_buttons.length > 1) {
+                    vid_buttons[0].remove();
+                }
             }
 
             static async addVXShareButton(tweet) {
@@ -379,10 +378,6 @@
             static async addSaveVideoButton(video) {
                 try {
                     let tweet = await Nodes.getParentTweetNode(video);
-                    if (await Nodes.tweetHasVideoMarked(tweet)) {
-                        return;
-                    }
-                    Nodes.markTweetVideo(tweet);
                     let share_button = await anchors.getTweetAnchor(tweet);
                     let download_button = await buttons.getVideoDownloadButton(share_button);
                     let filename = await filenames.getVideoFilename(tweet);
@@ -390,6 +385,7 @@
                     download_button.onmousedown = () => chrome.runtime.sendMessage({thespecialsecret: "download_cobalt", downurl: url, downfilename: filename});
                     share_button.after(download_button);
                     log.log(this.addSaveVideoButton, download_button);
+                    return tweet;
                 }
                 catch(error) {
                     log.error(this.addSaveVideoButton, error);

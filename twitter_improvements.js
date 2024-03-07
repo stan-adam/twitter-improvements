@@ -19,29 +19,21 @@
     const anchors = getAnchorFunctions();
     const links = getLinkFunctions();
     const filenames = getFilenameFunctions();
-    const nodes = getNodeFunctions();
+    const tweets = getTweetFunctions();
     const log = getLoggingFunction();
 
     // Anchor functions
 
     function getAnchorFunctions() {
         class Anchors {
-            static async getTweetAnchorFromTweet(tweet) {
+            static async getTweetAnchor(tweet) {
                 let share_button = tweet.querySelector('div[aria-label="Share post"]');
                 if (share_button === null) return;
                 return share_button.parentNode.parentNode;
             }
             
-            static async getImageAnchor(media) {
-                return media.parentNode; // add first child to this
-            }
-            
-            static async getTweetAnchorFromImage(image) {
-                return await this.getTweetAnchorFromTweet(image.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode);
-            }
-            
-            static async getTweetAnchorFromVideo(video) {
-                return await this.getTweetAnchorFromTweet(video.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode);
+            static async getImageAnchor(image) {
+                return image.parentNode; // add first child to this
             }
         }
         return Anchors;
@@ -60,7 +52,11 @@
                     return btn;
                 }
                 
-                static async getMediaDownloadButton(share_button) {
+                static async getImageDownloadButton(share_button) {
+                    return this.getVideoDownloadButton(share_button);
+                }
+
+                static async getVideoDownloadButton(share_button) {
                     let btn = await this.getButtonBaseFromTwitter(share_button);
                     btn.querySelector('path').setAttributeNS(null, "d", "M 12 17.41 l -5.7 -5.7 l 1.41 -1.42 L 11 13.59 V 4 h 2 V 13.59 l 3.3 -3.3 l 1.41 1.42 L 12 17.41 zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z");
                     return btn;
@@ -68,7 +64,7 @@
                 
                 static async getButtonBaseFromTwitter(share_button) {
                     let button = share_button.cloneNode(true);
-                    button.firstChild.firstChild.setAttribute("aria-label", "VX Share");
+                    button.firstChild.firstChild.setAttribute("aria-label", "Usy Button");
                     button.firstChild.firstChild.firstChild.addEventListener('mouseover', (elem) => this.onhover(elem));
                     button.firstChild.firstChild.firstChild.addEventListener('mouseout', (elem) => this.stophover(elem));
                     return button;
@@ -135,7 +131,14 @@
                     return await this.addClassesToButton(div);
                 }
 
-                static async getMediaDownloadButton(share_button) {
+                static async getImageDownloadButton(share_button) {
+                    let div = await this.getVideoDownloadButton();
+                    div.classList.add("usyimagediv");
+                    div.firstChild.firstChild.classList.add("usydownloadbutton");
+                    return div;
+                }
+
+                static async getVideoDownloadButton(share_button) {
                     let div = await this.getButton("M 12 17.41 l -5.7 -5.7 l 1.41 -1.42 L 11 13.59 V 4 h 2 V 13.59 l 3.3 -3.3 l 1.41 1.42 L 12 17.41 zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z");
                     return await this.addClassesToButton(div);
                 }
@@ -205,13 +208,13 @@
 
     function getFilenameFunctions() {
         class FileFunctions {
-            static async getImageFilenameFromMedia(media) {
+            static async getImageFilename(tweet) {
                 let url = window.location.href.split("/")[6];
                 if (url === "photo") {
                     url = window.location.href.split("/");
                 }
                 else {
-                    url = media.parentNode.parentNode.parentNode.parentNode.parentNode.querySelector('a[href*="/status/"').href.split("/");
+                    url = tweet.querySelector('a[href*="/photo/"').href.split("/");
                 }
                 let user = url[3];
                 let id = url[5];
@@ -219,7 +222,7 @@
                 return "[twitter] " + user + " - " + id + " - " + num;
             }
             
-            static async getVideoFilenameFromTweet(tweet) {
+            static async getVideoFilename(tweet) {
                 let url = await links.getSplitURLFromTweet(tweet);
                 let user = url[3];
                 let id = url[5];
@@ -279,7 +282,7 @@
 
     // Observes new tweets, runs each function on them
 
-    function getNodeFunctions() {
+    function getTweetFunctions() {
         class Nodes {
             static async getImageNodes(nodes) {
                 return nodes.filter(node => node.nodeName === "IMG")
@@ -302,16 +305,30 @@
                                 .filter(nodelist => nodelist.length > 0)
                                 .map(nodelist => nodelist[0]);
             }
+
+            static async markTweet(tweet) {
+                tweet.setAttribute("usy_tweet_marker", "yes");
+            }
+
+            static async getParentTweetNode(element_within_tweet) {
+                while(element_within_tweet.getAttribute("usy_tweet_marker") === null) {
+                    element_within_tweet = element_within_tweet.parentNode;
+                };
+                return element_within_tweet;
+            }
         
             static async node_operations(nodes) {
-                settings.vx_enabled && Nodes.getTweetNodes(nodes).then(nodes => nodes.forEach(nodes => Nodes.addVXShareButton(nodes)));
-                settings.image_enabled && Nodes.getImageNodes(nodes).then(nodes => nodes.forEach(nodes => Nodes.addSaveImageButton(nodes)));
-                settings.video_enabled && Nodes.getVideoNodes(nodes).then(nodes => nodes.forEach(nodes => Nodes.addSaveVideoButton(nodes)));
+                let tweets = await Nodes.getTweetNodes(nodes);
+                tweets.forEach(Nodes.markTweet);
+
+                settings.vx_enabled && tweets.forEach(node => Nodes.addVXShareButton(node));
+                settings.image_enabled && Nodes.getImageNodes(nodes).then(nodes => nodes.forEach(node => Nodes.addSaveImageButton(node)));
+                settings.video_enabled && Nodes.getVideoNodes(nodes).then(nodes => nodes.forEach(node => Nodes.addSaveVideoButton(node)));
             }
 
             static async addVXShareButton(tweet) {
                 try {
-                    let share_button = await anchors.getTweetAnchorFromTweet(tweet);
+                    let share_button = await anchors.getTweetAnchor(tweet);
                     let vx_button = await buttons.getVXShareButton(share_button);
                     let url = await links.getVXURLFromTweet(tweet);
                     vx_button.onmousedown = () => navigator.clipboard.writeText(url);
@@ -325,11 +342,12 @@
         
             static async addSaveImageButton(image) {
                 try {
+                    let tweet = await Nodes.getParentTweetNode(image);
                     let anchor = await anchors.getImageAnchor(image);
-                    let share_button = await anchors.getTweetAnchorFromImage(image);
-                    let download_button = await buttons.getMediaDownloadButton(share_button);
+                    let share_button = await anchors.getTweetAnchor(tweet);
+                    let download_button = await buttons.getImageDownloadButton(share_button);
                     let url = await links.getFullResImageURL(image);
-                    let filename = await filenames.getImageFilenameFromMedia(image);
+                    let filename = await filenames.getImageFilename(tweet);
                     anchor.appendChild(download_button);
                     download_button.onmousedown = () => chrome.runtime.sendMessage({thespecialsecret: "download", downurl: url, downfilename: filename});
                     log.log(this.addSaveImageButton, download_button);
@@ -341,19 +359,17 @@
         
             static async addSaveVideoButton(video) {
                 try {
-                    let share_button = await anchors.getTweetAnchorFromVideo(video);
-                    let download_button = await buttons.getMediaDownloadButton(share_button);
-                    for(let i = 0; i < 16; i++) {
-                        video = video.parentNode;
-                    }
-                    let filename = await filenames.getVideoFilenameFromTweet(video);
-                    let url = encodeURI(await links.getURLFromTweet(video));
+                    let tweet = await Nodes.getParentTweetNode(video);
+                    let share_button = await anchors.getTweetAnchor(tweet);
+                    let download_button = await buttons.getVideoDownloadButton(share_button);
+                    let filename = await filenames.getVideoFilename(tweet);
+                    let url = encodeURI(await links.getURLFromTweet(tweet));
                     download_button.onmousedown = () => chrome.runtime.sendMessage({thespecialsecret: "download_cobalt", downurl: url, downfilename: filename});
                     share_button.after(download_button);
                     log.log(this.addSaveVideoButton, download_button);
                 }
                 catch(error) {
-                    log.error(this.addSaveImageButton, error);
+                    log.error(this.addSaveVideoButton, error);
                 }
             }
         }
@@ -389,7 +405,7 @@
         log.log(observer, "Twitter Improvements Ready");
         if(await settings.getExtensionEnabled()) {
             const callback = async (mutationList, observer) => {
-                nodes.nodes_from_mutation_list(mutationList).then(nodes.node_operations);
+                tweets.nodes_from_mutation_list(mutationList).then(tweets.node_operations);
             }
         
             const observerConfig = {

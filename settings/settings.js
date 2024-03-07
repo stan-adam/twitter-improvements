@@ -4,16 +4,35 @@ if (typeof browser === "undefined") {
 
 const DIV = document.body.querySelector("DIV");
 
-const buttons = [
+const main = [
     ["vx_button", "Enable Share as VX Button", true], 
     ["image_button", "Enable Image Download Buttons", true],
     ["video_button", "Enable Video/GIF Download Buttons", true],
     ["experimental_button", "Enable Experimental (better looking) buttons", true],
+]
+
+const dev = [
     ["error_logging_enabled", "Enable Error Logging", false],
     ["info_logging_enabled", "Enable Info Logging", false]
 ]
 
-for (let i = 0; i < buttons.length; i++) create_button(buttons[i]);
+const options = {
+    General: main,
+    Developer: dev
+}
+
+for (let section in options) {
+    let outer = document.createElement("DIV");
+    let label = document.createElement("LABEL");
+    label.innerText = section + ":";
+    outer.appendChild(label);
+
+    for (let i = 0; i < options[section].length; i++) {
+        button = create_button(options[section][i]).then(node => outer.appendChild(node));
+    };
+
+    DIV.appendChild(outer);
+}
 
 async function create_button(button) {
     let outer = document.createElement("DIV");
@@ -40,9 +59,8 @@ async function create_button(button) {
     outer.appendChild(name_label);
     outer.appendChild(toggle);
 
-    DIV.appendChild(outer);
-
     toggle.onclick = () => toggle_value(button[0]);
+    return outer;
 }
 
 async function get_value(value) {

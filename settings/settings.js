@@ -5,10 +5,12 @@ if (typeof browser === "undefined") {
 const DIV = document.body.querySelector("DIV");
 
 const buttons = [
-    ["vx_button", "Enable Share as VX Button"], 
-    ["image_button", "Enable Image Download Buttons"],
-    ["video_button", "Enable Video/GIF Download Buttons"],
-    ["experimental_button", "Enable Experimental (better looking) buttons"]
+    ["vx_button", "Enable Share as VX Button", true], 
+    ["image_button", "Enable Image Download Buttons", true],
+    ["video_button", "Enable Video/GIF Download Buttons", true],
+    ["experimental_button", "Enable Experimental (better looking) buttons", true],
+    ["error_logging_enabled", "Enable Error Logging", false],
+    ["info_logging_enabled", "Enable Info Logging", false]
 ]
 
 for (let i = 0; i < buttons.length; i++) create_button(buttons[i]);
@@ -27,7 +29,7 @@ async function create_button(button) {
     let input_elem = document.createElement("INPUT");
     input_elem.setAttribute("type", "checkbox");
     input_elem.id = button[0];
-    input_elem.checked = await get_value(button[0]);
+    input_elem.checked = await get_value(button[0], button[2]);
 
     let span_elem = document.createElement("SPAN");
     span_elem.classList.add("slider", "round");
@@ -44,11 +46,15 @@ async function create_button(button) {
 }
 
 async function get_value(value) {
+    return get_value(value, true);
+}
+
+async function get_value(value, def) {
     let data = await browser.storage.local.get([value]);
     let enabled = data[value];
     if (enabled === undefined) {
         data = {};
-        data[value] = true;
+        data[value] = def;
         chrome.storage.local.set(data);
         enabled = true;
     }

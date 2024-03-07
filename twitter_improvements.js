@@ -5,20 +5,22 @@
         var browser = chrome;
     }
 
-    const ENABLE_LOGGING = false;
     const default_settings = {
         vx_button: true,
         image_button: true,
         video_button: true,
-        experimental_button: true
+        experimental_button: true,
+        error_logging_enabled: false,
+        info_logging_enabled: false
     };
 
     const settings = await getSettings();
-    const buttons = getButtonFunctions(settings.experimental_enabled);
+    const buttons = getButtonFunctions();
     const anchors = getAnchorFunctions();
     const links = getLinkFunctions();
     const filenames = getFilenameFunctions();
     const nodes = getNodeFunctions();
+    const log = getLoggingFunction();
 
     // Anchor functions
 
@@ -48,9 +50,9 @@
 
     // Button Functions
 
-    function getButtonFunctions(experimental) {
+    function getButtonFunctions() {
         let ButtonFunctions;
-        if (experimental) {
+        if (settings.experimental_enabled) {
             ButtonFunctions = class ExperimentalButtons {      
                 static async getVXShareButton(share_button) {
                     let btn = await this.getButtonBaseFromTwitter(share_button);
@@ -236,6 +238,8 @@
             image_enabled;
             video_enabled;
             experimental_enabled;
+            error_logging_enabled;
+            info_logging_enabled;
         
             static async getExtensionEnabled() {
                 return this.vx_enabled || this.image_enabled || this.video_enabled;
@@ -253,6 +257,8 @@
                 this.image_enabled = data["image_button"];
                 this.video_enabled = data["video_button"];
                 this.experimental_enabled = data["experimental_button"];
+                this.error_logging_enabled = data["error_logging_enabled"];
+                this.info_logging_enabled = data["info_logging_enabled"];
             }
         
             static async checkStorageValid(data) {
@@ -310,11 +316,10 @@
                     let url = await links.getVXURLFromTweet(tweet);
                     vx_button.onmousedown = () => navigator.clipboard.writeText(url);
                     share_button.after(vx_button);
-                    ENABLE_LOGGING && console.log("Created VX Button: " + vx_button);
+                    log.log(this.addVXShareButton, vx_button);
                 }
                 catch(error) {
-                    ENABLE_LOGGING && console.error("add_vx error: " + error);
-                    return;
+                    log.error(this.addVXShareButton, error);
                 }
             }
         
@@ -327,11 +332,10 @@
                     let filename = await filenames.getImageFilenameFromMedia(image);
                     anchor.appendChild(download_button);
                     download_button.onmousedown = () => chrome.runtime.sendMessage({thespecialsecret: "download", downurl: url, downfilename: filename});
-                    ENABLE_LOGGING && console.log("Created Image Download Button: " + download_button);
+                    log.log(this.addSaveImageButton, download_button);
                 }
                 catch(error) {
-                    ENABLE_LOGGING && console.error("save_image error: " + error);
-                    return;
+                    log.error(this.addSaveImageButton, error);
                 }
             }
         
@@ -346,11 +350,10 @@
                     let url = encodeURI(await links.getURLFromTweet(video));
                     download_button.onmousedown = () => chrome.runtime.sendMessage({thespecialsecret: "download_cobalt", downurl: url, downfilename: filename});
                     share_button.after(download_button);
-                    ENABLE_LOGGING && console.log("Created Video Download Button: " + download_button);
+                    log.log(this.addSaveVideoButton, download_button);
                 }
                 catch(error) {
-                    ENABLE_LOGGING && console.error("save_video error: " + error);
-                    return;
+                    log.error(this.addSaveImageButton, error);
                 }
             }
         }
@@ -358,7 +361,32 @@
     }
 
 
+    // logging
+
+    function getLoggingFunction() {
+        class Logging {
+            static async log(func, item) {
+                if (settings.info_logging_enabled) {
+                    console.log(func.name);
+                    console.log(item);
+                }
+            }
+
+            static async error(func, item) {
+                if (settings.error_logging_enabled) {
+                    console.error(func.name);
+                    console.error(item);
+                }
+            }
+        }
+        return Logging;
+    }
+
+
+    // observation initialisation
+
     async function observer() {
+        log.log(observer, "Twitter Improvements Ready");
         if(await settings.getExtensionEnabled()) {
             const callback = async (mutationList, observer) => {
                 nodes.nodes_from_mutation_list(mutationList).then(nodes.node_operations);
@@ -371,7 +399,7 @@
             let targetNode = document.body;
             const init_observer = new MutationObserver(callback);
             init_observer.observe(targetNode, observerConfig);
-            ENABLE_LOGGING && console.log("Mutation Observer Started");
+            log.log("Mutation Observer Started");
         }
     }
 
@@ -379,11 +407,9 @@
     // Run when page is load, initialises tweet observation
 
     if (document.readyState === "loading") {
-        ENABLE_LOGGING && console.log("Twitter Improvements Ready");
         document.addEventListener("DOMContentLoaded", observer());
     } 
     else {
-        ENABLE_LOGGING && console.log("Twitter Improvements Ready");
         observer();
     }
 })();

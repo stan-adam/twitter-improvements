@@ -208,13 +208,13 @@
 
     function getFilenameFunctions() {
         class FileFunctions {
-            static async getImageFilename(tweet) {
+            static async getImageFilename(image_url) {
                 let url = window.location.href.split("/")[6];
                 if (url === "photo") {
                     url = window.location.href.split("/");
                 }
                 else {
-                    url = tweet.querySelector('a[href*="/photo/"').href.split("/");
+                    url = image_url.split("/");
                 }
                 let user = url[3];
                 let id = url[5];
@@ -297,7 +297,8 @@
             static async getTweetNodes(nodes) {
                 return nodes.filter(node => node.nodeName === "DIV")
                             .filter(node => node.attributes.item(0) !== null)
-                            .filter(node => node.attributes.item(0).nodeValue === 'cellInnerDiv');
+                            .filter(node => node.attributes.item(0).nodeValue === 'cellInnerDiv')
+                            .filter(node => node.getAttribute("usy_tweet_marker") === null);
             }
 
             static async nodes_from_mutation_list(mutationList) {
@@ -317,7 +318,7 @@
                 return element_within_tweet;
             }
         
-            static async node_operations(nodes) {
+            static async nodeOperations(nodes) {
                 let tweets = await Nodes.getTweetNodes(nodes);
                 tweets.forEach(Nodes.markTweet);
 
@@ -347,7 +348,7 @@
                     let share_button = await anchors.getTweetAnchor(tweet);
                     let download_button = await buttons.getImageDownloadButton(share_button);
                     let url = await links.getFullResImageURL(image);
-                    let filename = await filenames.getImageFilename(tweet);
+                    let filename = await filenames.getImageFilename(image.parentNode.parentNode.parentNode.href);
                     anchor.appendChild(download_button);
                     download_button.onmousedown = () => chrome.runtime.sendMessage({thespecialsecret: "download", downurl: url, downfilename: filename});
                     log.log(this.addSaveImageButton, download_button);
@@ -405,7 +406,7 @@
         log.log(observer, "Twitter Improvements Ready");
         if(await settings.getExtensionEnabled()) {
             const callback = async (mutationList, observer) => {
-                tweets.nodes_from_mutation_list(mutationList).then(tweets.node_operations);
+                tweets.nodes_from_mutation_list(mutationList).then(tweets.nodeOperations);
             }
         
             const observerConfig = {

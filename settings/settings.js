@@ -74,7 +74,7 @@ async function get_value(value, def) {
         data = {};
         data[value] = def;
         chrome.storage.local.set(data);
-        enabled = true;
+        enabled = def;
     }
     return enabled;
 }

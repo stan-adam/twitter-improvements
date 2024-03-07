@@ -48,16 +48,20 @@
             ButtonFunctions = class ExperimentalButtons {      
                 static async getVXShareButton(share_button) {
                     let btn = await this.getButtonBaseFromTwitter(share_button);
+                    btn.setAttribute("usy_label", "VX");
                     btn.querySelector('path').setAttributeNS(null, "d", "M 18.36 5.64 c -1.95 -1.96 -5.11 -1.96 -7.07 0 l -1.41 1.41 l -1.42 -1.41 l 1.42 -1.42 c 2.73 -2.73 7.16 -2.73 9.9 0 c 2.73 2.74 2.73 7.17 0 9.9 l -1.42 1.42 l -1.41 -1.42 l 1.41 -1.41 c 1.96 -1.96 1.96 -5.12 0 -7.07 z m -2.12 3.53 z m -12.02 0.71 l 1.42 -1.42 l 1.41 1.42 l -1.41 1.41 c -1.96 1.96 -1.96 5.12 0 7.07 c 1.95 1.96 5.11 1.96 7.07 0 l 1.41 -1.41 l 1.42 1.41 l -1.42 1.42 c -2.73 2.73 -7.16 2.73 -9.9 0 c -2.73 -2.74 -2.73 -7.17 0 -9.9 z m 1 5 l 1.2728 -1.2728 l 2.9698 1.2728 l -1.4142 -2.8284 l 1.2728 -1.2728 l 2.2627 6.2225 l -6.364 -2.1213 m 4.9497 -4.9497 l 3.182 1.0607 l 1.0607 3.182 l 1.2728 -1.2728 l -0.7071 -2.1213 l 2.1213 0.7071 l 1.2728 -1.2728 l -3.182 -1.0607 l -1.0607 -3.182 l -1.2728 1.2728 l 0.7071 2.1213 l -2.1213 -0.7071 l -1.2728 1.2728");
                     return btn;
                 }
                 
                 static async getImageDownloadButton(share_button) {
-                    return this.getVideoDownloadButton(share_button);
+                    let btn = await this.getVideoDownloadButton(share_button);
+                    btn.setAttribute("usy_label", "Image");
+                    return btn;
                 }
 
                 static async getVideoDownloadButton(share_button) {
                     let btn = await this.getButtonBaseFromTwitter(share_button);
+                    btn.setAttribute("usy_label", "Video");
                     btn.querySelector('path').setAttributeNS(null, "d", "M 12 17.41 l -5.7 -5.7 l 1.41 -1.42 L 11 13.59 V 4 h 2 V 13.59 l 3.3 -3.3 l 1.41 1.42 L 12 17.41 zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z");
                     return btn;
                 }
@@ -128,6 +132,7 @@
 
                 static async getVXShareButton(share_button) {
                     let div = await this.getButton("M 18.36 5.64 c -1.95 -1.96 -5.11 -1.96 -7.07 0 l -1.41 1.41 l -1.42 -1.41 l 1.42 -1.42 c 2.73 -2.73 7.16 -2.73 9.9 0 c 2.73 2.74 2.73 7.17 0 9.9 l -1.42 1.42 l -1.41 -1.42 l 1.41 -1.41 c 1.96 -1.96 1.96 -5.12 0 -7.07 z m -2.12 3.53 z m -12.02 0.71 l 1.42 -1.42 l 1.41 1.42 l -1.41 1.41 c -1.96 1.96 -1.96 5.12 0 7.07 c 1.95 1.96 5.11 1.96 7.07 0 l 1.41 -1.41 l 1.42 1.41 l -1.42 1.42 c -2.73 2.73 -7.16 2.73 -9.9 0 c -2.73 -2.74 -2.73 -7.17 0 -9.9 z m 1 5 l 1.2728 -1.2728 l 2.9698 1.2728 l -1.4142 -2.8284 l 1.2728 -1.2728 l 2.2627 6.2225 l -6.364 -2.1213 m 4.9497 -4.9497 l 3.182 1.0607 l 1.0607 3.182 l 1.2728 -1.2728 l -0.7071 -2.1213 l 2.1213 0.7071 l 1.2728 -1.2728 l -3.182 -1.0607 l -1.0607 -3.182 l -1.2728 1.2728 l 0.7071 2.1213 l -2.1213 -0.7071 l -1.2728 1.2728");
+                    div.setAttribute("usy_label", "VX");
                     return await this.addClassesToButton(div);
                 }
 
@@ -135,11 +140,13 @@
                     let div = await this.getVideoDownloadButton();
                     div.classList.add("usyimagediv");
                     div.firstChild.firstChild.classList.add("usydownloadbutton");
+                    div.setAttribute("usy_label", "Image");
                     return div;
                 }
 
                 static async getVideoDownloadButton(share_button) {
                     let div = await this.getButton("M 12 17.41 l -5.7 -5.7 l 1.41 -1.42 L 11 13.59 V 4 h 2 V 13.59 l 3.3 -3.3 l 1.41 1.42 L 12 17.41 zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z");
+                    div.setAttribute("usy_label", "Image");
                     return await this.addClassesToButton(div);
                 }
 
@@ -208,18 +215,17 @@
 
     function getFilenameFunctions() {
         class FileFunctions {
-            static async getImageFilename(image_url) {
+            static async getImageFilename(tweet) {
                 let url = window.location.href.split("/")[6];
                 if (url === "photo") {
                     url = window.location.href.split("/");
                 }
                 else {
-                    url = image_url.split("/");
+                    url = tweet.querySelector('a[href*="/photo/"').href.split("/");
                 }
                 let user = url[3];
                 let id = url[5];
-                let num = url[7];
-                return "[twitter] " + user + " - " + id + " - " + num;
+                return "[twitter] " + user + " - " + id;
             }
             
             static async getVideoFilename(tweet) {
@@ -311,8 +317,20 @@
                 tweet.setAttribute("usy_tweet_marker", "yes");
             }
 
+            static async markTweetVideo(tweet) {
+                tweet.setAttribute("usy_tweet_contains_video", "true");
+            }
+
+            static async tweetHasVideoMarked(tweet) {
+                return tweet.getAttribute("usy_tweet_contains_video") !== null;
+            }
+
+            static async elementIsMarked(tweet) {
+                return tweet.getAttribute("usy_tweet_marker") !== null;
+            }
+
             static async getParentTweetNode(element_within_tweet) {
-                while(element_within_tweet.getAttribute("usy_tweet_marker") === null) {
+                while(!await Nodes.elementIsMarked(element_within_tweet)) {
                     element_within_tweet = element_within_tweet.parentNode;
                 };
                 return element_within_tweet;
@@ -324,7 +342,7 @@
 
                 settings.vx_enabled && tweets.forEach(node => Nodes.addVXShareButton(node));
                 settings.image_enabled && Nodes.getImageNodes(nodes).then(nodes => nodes.forEach(node => Nodes.addSaveImageButton(node)));
-                settings.video_enabled && Nodes.getVideoNodes(nodes).then(nodes => nodes.forEach(node => Nodes.addSaveVideoButton(node)));
+                settings.video_enabled && Nodes.getVideoNodes(nodes).then(nodes => Nodes.addSaveVideoButton(nodes[0]));
             }
 
             static async addVXShareButton(tweet) {
@@ -348,7 +366,7 @@
                     let share_button = await anchors.getTweetAnchor(tweet);
                     let download_button = await buttons.getImageDownloadButton(share_button);
                     let url = await links.getFullResImageURL(image);
-                    let filename = await filenames.getImageFilename(image.parentNode.parentNode.parentNode.href);
+                    let filename = await filenames.getImageFilename(tweet);
                     anchor.appendChild(download_button);
                     download_button.onmousedown = () => chrome.runtime.sendMessage({thespecialsecret: "download", downurl: url, downfilename: filename});
                     log.log(this.addSaveImageButton, download_button);
@@ -361,6 +379,10 @@
             static async addSaveVideoButton(video) {
                 try {
                     let tweet = await Nodes.getParentTweetNode(video);
+                    if (await Nodes.tweetHasVideoMarked(tweet)) {
+                        return;
+                    }
+                    Nodes.markTweetVideo(tweet);
                     let share_button = await anchors.getTweetAnchor(tweet);
                     let download_button = await buttons.getVideoDownloadButton(share_button);
                     let filename = await filenames.getVideoFilename(tweet);

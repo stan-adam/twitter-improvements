@@ -76,16 +76,36 @@ async function download_cobalt(url, filename) {
     let response = await fetch(api_url, requestOptions);
     let json = await response.json();
     let down_url = json.url;
-    if (down_url.includes(".mp4")) {
-        filename += ".mp4";
+    if(!response.ok) {
+        alert("Cobalt Error");
+    }
+    if(down_url === undefined) {
+        let picker = json.picker;
+        for (let i = 0; i < picker.length; i++) {
+            down_url = picker[i].url;
+            let new_file = filename + " - " + (i + 1) + getVideoFileEnd(down_url);
+            chrome.downloads.download({
+                filename: new_file,
+                url: down_url
+            });
+        }
     }
     else {
-        filename += ".gif";
+        filename += getVideoFileEnd(down_url);
+        chrome.downloads.download({
+            filename: filename,
+            url: down_url
+        });
     }
-    chrome.downloads.download({
-        filename: filename,
-        url: json.url
-    });
+}
+
+function getVideoFileEnd(url) {
+    if (url.includes(".mp4")) {
+        return ".mp4";
+    }
+    else {
+        return ".gif";
+    }
 }
 
 chrome.runtime.onMessage.addListener(

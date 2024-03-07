@@ -1,9 +1,9 @@
 {
     "manifest_version": 3,
     "name": "Twitter Improvements",
-    "version": "1.5.1",
+    "version": "1.6",
   
-    "description": "Adds new buttons to each tweet on twitter",
+    "description": "Various helpful twitter improvements",
   
     "icons": {
       "48": "icons/download-48.png"
@@ -42,5 +42,10 @@
         "js": ["twitter_improvements.js"],
         "css": ["twitter_improvements.css"]
       }
-    ]
+    ],
+
+    "options_ui": {
+      "page": "settings/settings.html",
+      "open_in_tab": false
+    }
 }

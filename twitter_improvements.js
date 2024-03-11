@@ -14,6 +14,22 @@
         info_logging_enabled: false
     };
 
+    // define constants
+
+    const share_button_queryselector = 'div[aria-label="Share post"]';
+    const image_with_id_queryselector = 'a[href*="/photo/"]';
+    const vx_button_path = "M 18.36 5.64 c -1.95 -1.96 -5.11 -1.96 -7.07 0 l -1.41 1.41 l -1.42 -1.41 l 1.42 -1.42 c 2.73 -2.73 7.16 -2.73 9.9 0 c 2.73 2.74 2.73 7.17 0 9.9 l -1.42 1.42 l -1.41 -1.42 l 1.41 -1.41 c 1.96 -1.96 1.96 -5.12 0 -7.07 z m -2.12 3.53 z m -12.02 0.71 l 1.42 -1.42 l 1.41 1.42 l -1.41 1.41 c -1.96 1.96 -1.96 5.12 0 7.07 c 1.95 1.96 5.11 1.96 7.07 0 l 1.41 -1.41 l 1.42 1.41 l -1.42 1.42 c -2.73 2.73 -7.16 2.73 -9.9 0 c -2.73 -2.74 -2.73 -7.17 0 -9.9 z m 1 5 l 1.2728 -1.2728 l 2.9698 1.2728 l -1.4142 -2.8284 l 1.2728 -1.2728 l 2.2627 6.2225 l -6.364 -2.1213 m 4.9497 -4.9497 l 3.182 1.0607 l 1.0607 3.182 l 1.2728 -1.2728 l -0.7071 -2.1213 l 2.1213 0.7071 l 1.2728 -1.2728 l -3.182 -1.0607 l -1.0607 -3.182 l -1.2728 1.2728 l 0.7071 2.1213 l -2.1213 -0.7071 l -1.2728 1.2728";
+    const download_button_path = "M 12 17.41 l -5.7 -5.7 l 1.41 -1.42 L 11 13.59 V 4 h 2 V 13.59 l 3.3 -3.3 l 1.41 1.42 L 12 17.41 zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z";
+    const video_queryselector = 'div[data-testid="videoComponent"]';
+    const image_queryselector = "https://pbs.twimg.com/media/";
+    const tweet_marker = "usy_tweet_marker";
+
+    const custom_label = "usy_label";
+    const vx_marker = "VX";
+    const image_down_marker = "Image";
+    const video_down_marker = "Video";
+    const video_down_selector = 'div[usy_label="Video"]';
+
     const settings = await getSettings();
     const buttons = getButtonFunctions();
     const anchors = getAnchorFunctions();
@@ -27,7 +43,7 @@
     function getAnchorFunctions() {
         class Anchors {
             static async getTweetAnchor(tweet) {
-                let share_button = tweet.querySelector('div[aria-label="Share post"]');
+                let share_button = tweet.querySelector(share_button_queryselector);
                 if (share_button === null) return;
                 return share_button.parentNode.parentNode;
             }
@@ -48,21 +64,21 @@
             ButtonFunctions = class ExperimentalButtons {      
                 static async getVXShareButton(share_button) {
                     let btn = await this.getButtonBaseFromTwitter(share_button);
-                    btn.setAttribute("usy_label", "VX");
-                    btn.querySelector('path').setAttributeNS(null, "d", "M 18.36 5.64 c -1.95 -1.96 -5.11 -1.96 -7.07 0 l -1.41 1.41 l -1.42 -1.41 l 1.42 -1.42 c 2.73 -2.73 7.16 -2.73 9.9 0 c 2.73 2.74 2.73 7.17 0 9.9 l -1.42 1.42 l -1.41 -1.42 l 1.41 -1.41 c 1.96 -1.96 1.96 -5.12 0 -7.07 z m -2.12 3.53 z m -12.02 0.71 l 1.42 -1.42 l 1.41 1.42 l -1.41 1.41 c -1.96 1.96 -1.96 5.12 0 7.07 c 1.95 1.96 5.11 1.96 7.07 0 l 1.41 -1.41 l 1.42 1.41 l -1.42 1.42 c -2.73 2.73 -7.16 2.73 -9.9 0 c -2.73 -2.74 -2.73 -7.17 0 -9.9 z m 1 5 l 1.2728 -1.2728 l 2.9698 1.2728 l -1.4142 -2.8284 l 1.2728 -1.2728 l 2.2627 6.2225 l -6.364 -2.1213 m 4.9497 -4.9497 l 3.182 1.0607 l 1.0607 3.182 l 1.2728 -1.2728 l -0.7071 -2.1213 l 2.1213 0.7071 l 1.2728 -1.2728 l -3.182 -1.0607 l -1.0607 -3.182 l -1.2728 1.2728 l 0.7071 2.1213 l -2.1213 -0.7071 l -1.2728 1.2728");
+                    btn.setAttribute(custom_label, vx_marker);
+                    btn.querySelector('path').setAttributeNS(null, "d", vx_button_path);
                     return btn;
                 }
                 
                 static async getImageDownloadButton(share_button) {
                     let btn = await this.getVideoDownloadButton(share_button);
-                    btn.setAttribute("usy_label", "Image");
+                    btn.setAttribute(custom_label, image_down_marker);
                     return btn;
                 }
 
                 static async getVideoDownloadButton(share_button) {
                     let btn = await this.getButtonBaseFromTwitter(share_button);
-                    btn.setAttribute("usy_label", "Video");
-                    btn.querySelector('path').setAttributeNS(null, "d", "M 12 17.41 l -5.7 -5.7 l 1.41 -1.42 L 11 13.59 V 4 h 2 V 13.59 l 3.3 -3.3 l 1.41 1.42 L 12 17.41 zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z");
+                    btn.setAttribute(custom_label, video_down_marker);
+                    btn.querySelector('path').setAttributeNS(null, "d", download_button_path);
                     return btn;
                 }
                 
@@ -131,8 +147,8 @@
                 }
 
                 static async getVXShareButton(share_button) {
-                    let div = await this.getButton("M 18.36 5.64 c -1.95 -1.96 -5.11 -1.96 -7.07 0 l -1.41 1.41 l -1.42 -1.41 l 1.42 -1.42 c 2.73 -2.73 7.16 -2.73 9.9 0 c 2.73 2.74 2.73 7.17 0 9.9 l -1.42 1.42 l -1.41 -1.42 l 1.41 -1.41 c 1.96 -1.96 1.96 -5.12 0 -7.07 z m -2.12 3.53 z m -12.02 0.71 l 1.42 -1.42 l 1.41 1.42 l -1.41 1.41 c -1.96 1.96 -1.96 5.12 0 7.07 c 1.95 1.96 5.11 1.96 7.07 0 l 1.41 -1.41 l 1.42 1.41 l -1.42 1.42 c -2.73 2.73 -7.16 2.73 -9.9 0 c -2.73 -2.74 -2.73 -7.17 0 -9.9 z m 1 5 l 1.2728 -1.2728 l 2.9698 1.2728 l -1.4142 -2.8284 l 1.2728 -1.2728 l 2.2627 6.2225 l -6.364 -2.1213 m 4.9497 -4.9497 l 3.182 1.0607 l 1.0607 3.182 l 1.2728 -1.2728 l -0.7071 -2.1213 l 2.1213 0.7071 l 1.2728 -1.2728 l -3.182 -1.0607 l -1.0607 -3.182 l -1.2728 1.2728 l 0.7071 2.1213 l -2.1213 -0.7071 l -1.2728 1.2728");
-                    div.setAttribute("usy_label", "VX");
+                    let div = await this.getButton(vx_button_path);
+                    div.setAttribute(custom_label, vx_marker);
                     return await this.addClassesToButton(div);
                 }
 
@@ -140,13 +156,13 @@
                     let div = await this.getVideoDownloadButton();
                     div.classList.add("usyimagediv");
                     div.firstChild.firstChild.classList.add("usydownloadbutton");
-                    div.setAttribute("usy_label", "Image");
+                    div.setAttribute(custom_label, image_down_marker);
                     return div;
                 }
 
                 static async getVideoDownloadButton(share_button) {
-                    let div = await this.getButton("M 12 17.41 l -5.7 -5.7 l 1.41 -1.42 L 11 13.59 V 4 h 2 V 13.59 l 3.3 -3.3 l 1.41 1.42 L 12 17.41 zM21 15l-.02 3.51c0 1.38-1.12 2.49-2.5 2.49H5.5C4.11 21 3 19.88 3 18.5V15h2v3.5c0 .28.22.5.5.5h12.98c.28 0 .5-.22.5-.5L19 15h2z");
-                    div.setAttribute("usy_label", "Image");
+                    let div = await this.getButton(download_button_path);
+                    div.setAttribute(custom_label, video_down_marker);
                     return await this.addClassesToButton(div);
                 }
 
@@ -215,17 +231,12 @@
 
     function getFilenameFunctions() {
         class FileFunctions {
-            static async getImageFilename(tweet) {
-                let url = window.location.href.split("/")[6];
-                if (url === "photo") {
-                    url = window.location.href.split("/");
-                }
-                else {
-                    url = tweet.querySelector('a[href*="/photo/"').href.split("/");
-                }
+            static async getImageFilename(url) {
+                url = url.split("/");
                 let user = url[3];
                 let id = url[5];
-                return "[twitter] " + user + " - " + id;
+                let num = url[7]
+                return "[twitter] " + user + " - " + id + " - " + num;
             }
             
             static async getVideoFilename(tweet) {
@@ -292,19 +303,19 @@
         class Nodes {
             static async getImageNodes(nodes) {
                 return nodes.filter(node => node.nodeName === "IMG")
-                            .filter(node => node.src.includes("https://pbs.twimg.com/media/"));
+                            .filter(node => node.src.includes(image_queryselector));
             }
         
             static async getVideoNodes(nodes) {  
                 return nodes.filter(node => node.nodeName === "DIV")
-                            .filter(node => node.querySelector('div[data-testid="videoComponent"]'));
+                            .filter(node => node.querySelector(video_queryselector));
             }
         
             static async getTweetNodes(nodes) {
                 return nodes.filter(node => node.nodeName === "DIV")
                             .filter(node => node.attributes.item(0) !== null)
                             .filter(node => node.attributes.item(0).nodeValue === 'cellInnerDiv')
-                            .filter(node => node.getAttribute("usy_tweet_marker") === null);
+                            .filter(node => node.getAttribute(tweet_marker) === null);
             }
 
             static async nodes_from_mutation_list(mutationList) {
@@ -314,18 +325,33 @@
             }
 
             static async markTweet(tweet) {
-                tweet.setAttribute("usy_tweet_marker", "yes");
+                tweet.setAttribute(tweet_marker, "yes");
             }
 
             static async elementIsMarked(tweet) {
-                return tweet.getAttribute("usy_tweet_marker") !== null;
+                return tweet.getAttribute(tweet_marker) !== null;
             }
 
             static async getParentTweetNode(element_within_tweet) {
-                while(!await Nodes.elementIsMarked(element_within_tweet)) {
-                    element_within_tweet = element_within_tweet.parentNode;
-                };
-                return element_within_tweet;
+                try {
+                    while(!await Nodes.elementIsMarked(element_within_tweet)) {
+                        element_within_tweet = element_within_tweet.parentNode;
+                    };
+                    return element_within_tweet;
+                }
+                catch {
+                    while(!element_within_tweet.querySelector(share_button_queryselector)) {
+                        element_within_tweet = element_within_tweet.parentNode;
+                    };
+                    return element_within_tweet; // FIX THIS LATER
+                }
+            }
+
+            static async getRespectiveImageURL(image) {
+                while(!image.querySelector(image_with_id_queryselector)) {
+                    image = image.parentNode;
+                }
+                return image.firstChild.href;
             }
         
             static async nodeOperations(nodes) {
@@ -338,7 +364,7 @@
             }
 
             static async cleanTweet(tweet) {
-                let vid_buttons = tweet.querySelectorAll('div[usy_label="Video"');
+                let vid_buttons = tweet.querySelectorAll(video_down_selector);
                 if (vid_buttons.length > 1) {
                     vid_buttons[0].remove();
                 }
@@ -365,7 +391,7 @@
                     let share_button = await anchors.getTweetAnchor(tweet);
                     let download_button = await buttons.getImageDownloadButton(share_button);
                     let url = await links.getFullResImageURL(image);
-                    let filename = await filenames.getImageFilename(tweet);
+                    let filename = await filenames.getImageFilename(await Nodes.getRespectiveImageURL(image));
                     anchor.appendChild(download_button);
                     download_button.onmousedown = () => chrome.runtime.sendMessage({thespecialsecret: "download", downurl: url, downfilename: filename});
                     log.log(this.addSaveImageButton, download_button);

@@ -398,8 +398,8 @@
                     let down_url = await links.getFullResImageURL(image);
                     let image_url = await links.getRespectiveImageURL(image);
                     if(image_url === null) {
-                        download_button.onmousedown = () => {
-                            let filename = window.location.href;
+                        download_button.onmousedown = async () => {
+                            let filename = await filenames.getImageFilename(window.location.href);
                             chrome.runtime.sendMessage({thespecialsecret: "download", downurl: down_url, downfilename: filename});
                         };
                     }

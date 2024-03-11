@@ -6,6 +6,14 @@ chrome.contextMenus.create(
     }
 );
 
+chrome.contextMenus.create(
+    {
+        id: "copy-image",
+        title: "Copy Twitter Image",
+        contexts: ["image", "link"],
+    }
+);
+
 chrome.contextMenus.onClicked.addListener((info, tab) => {
     if (!isTwitter(tab.url)) {
         return;
@@ -14,6 +22,9 @@ chrome.contextMenus.onClicked.addListener((info, tab) => {
 
     if (info.menuItemId === "save-image") {   
         saveTwitterImage(url, info);
+    }
+    else {
+        copyTwitterImage(url);
     }
 })
 
@@ -46,6 +57,10 @@ function saveTwitterImage(url, info) {
         filename: filename,
         url: img
     });
+}
+
+function copyTwitterImage(url) {
+    navigator.clipboard.write(url);
 }
 
 async function download(url, filename) {
